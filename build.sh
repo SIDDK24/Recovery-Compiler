@@ -127,11 +127,11 @@ cd /home/runner/builder || exit 1
 
 echo "::group::Source Repo Sync"
 printf "Initializing Repo\n"
-if [[ "${MANIFEST}" == "orangefox10" ]]; then
+if [[ "${MANIFEST}" == "orangefox11" ]]; then
     printf "Manually Preparing Ofox Repos For Dynamic Partition Device\n"
-    git clone https://github.com/CarbonatedBlack/ofox-sync.git
-    cd ofox-sync || exit
-    bash ./get_fox_10.sh /home/runner/builder
+    git clone https://gitlab.com/OrangeFox/sync.git (or, using ssh, "git clone git@gitlab.com:OrangeFox/sync.git")
+    cd ~/sync/
+    ./orangefox_sync.sh --branch 11.0 --path ~/fox_11.0
     cd /home/runner/builder || exit
 else
     printf "We will be using %s for Manifest source\n" "${MANIFEST}"
