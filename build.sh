@@ -127,16 +127,14 @@ cd /home/runner/builder || exit 1
 
 echo "::group::Source Repo Sync"
 printf "Initializing Repo\n"
-if [[ "${MANIFEST}" == "orangefox11" ]]; then
+if [[ "${MANIFEST}" == "orangefox10" ]]; then
     printf "Manually Preparing Ofox Repos For Dynamic Partition Device\n"
-    git clone https://gitlab.com/OrangeFox/sync.git
-    cd ~/sync/
-    ./orangefox_sync.sh --branch 11.0 --path ~/fox_11.0
+    git clone https://github.com/CarbonatedBlack/ofox-sync.git
+    cd ofox-sync || exit
+    bash ./get_fox_10.sh /home/runner/builder
     cd /home/runner/builder || exit
 else
     printf "We will be using %s for Manifest source\n" "${MANIFEST}"
-    git config --global user.email "sk@gmail.com"
-    git config --global user.name "SIDDK24"
     repo init -q -u ${MANIFEST} --depth=1 --groups=all,-notdefault,-device,-darwin,-x86,-mips || { printf "Repo Initialization Failed.\n"; exit 1; }
     repo sync -c -q --force-sync --no-clone-bundle --no-tags -j6 || { printf "Git-Repo Sync Failed.\n"; exit 1; }
     repo sync -c -q --force-sync --no-clone-bundle --no-tags -j6 || { printf "Git-Repo Sync Failed.\n"; exit 1; }
@@ -147,7 +145,7 @@ echo "::group::Device and Kernel Tree Cloning"
 printf "Cloning Device Tree\n"
 git clone ${DT_LINK} --depth=1 device/${VENDOR}/${CODENAME}
 # omni.dependencies file is a must inside DT, otherwise lunch fails
-[[ ! -f device/${VENDOR}/${CODENAME}/twrp.dependencies ]] && printf "[\n]\n" > device/${VENDOR}/${CODENAME}/twrp.dependencies
+[[ ! -f device/${VENDOR}/${CODENAME}/${SOURCE}.dependencies ]] && printf "[\n]\n" > device/${VENDOR}/${CODENAME}/${SOURCE}.dependencies
 if [[ ! -z "${KERNEL_LINK}" ]]; then
     printf "Using Manual Kernel Compilation\n"
     git clone ${KERNEL_LINK} --depth=1 kernel/${VENDOR}/${CODENAME}
@@ -175,7 +173,7 @@ export ALLOW_MISSING_DEPENDENCIES=true
 # and then `source` and `lunch` again
 
 source build/envsetup.sh
-lunch twrp_${CODENAME}-${FLAVOR} || { printf "Compilation failed.\n"; exit 1; }
+lunch ${SOURCE}_${CODENAME}-${FLAVOR} || { printf "Compilation failed.\n"; exit 1; }
 echo "::endgroup::"
 
 echo "::group::Compilation"
